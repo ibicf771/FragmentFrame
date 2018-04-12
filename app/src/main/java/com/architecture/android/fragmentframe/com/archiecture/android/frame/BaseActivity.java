@@ -28,9 +28,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private FragmentManager mFManager;
     private AtomicInteger mAtomicInteger = new AtomicInteger();
-    private List<NodeFragment> mFragmentStack;
-    private Map<NodeFragment, FragmentStackEntity> mFragmentEntityMap;
-    private FragmentContainerManager mFragmentContainerManager;
+    private List<NodeFragment> mFragmentStack = new ArrayList<>();
+    private Map<NodeFragment, FragmentStackEntity> mFragmentEntityMap = new HashMap<>();
 
     public static class FragmentStackEntity {
         private FragmentStackEntity() {
@@ -57,9 +56,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFManager = getSupportFragmentManager();
-        mFragmentContainerManager = FragmentContainerManager.getInstance();
-        mFragmentStack = mFragmentContainerManager.getFragmentStack();
-        mFragmentEntityMap = mFragmentContainerManager.getFragmentEntityMap();
     }
 
     @Override
