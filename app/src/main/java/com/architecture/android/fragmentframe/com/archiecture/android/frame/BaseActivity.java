@@ -6,11 +6,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
+
+import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -23,14 +28,15 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private FragmentManager mFManager;
     private AtomicInteger mAtomicInteger = new AtomicInteger();
-    private List<NodeFragment> mFragmentStack = new ArrayList<>();
-    private Map<NodeFragment, FragmentStackEntity> mFragmentEntityMap = new HashMap<>();
+    private List<NodeFragment> mFragmentStack;
+    private Map<NodeFragment, FragmentStackEntity> mFragmentEntityMap;
+    private FragmentContainerManager mFragmentContainerManager;
 
-    static class FragmentStackEntity {
+    public static class FragmentStackEntity {
         private FragmentStackEntity() {
         }
 
-        private boolean isSticky = false;
+        public boolean isSticky = false;
         private int requestCode = REQUEST_CODE_INVALID;
         @ResultCode
         int resultCode = RESULT_CANCELED;
@@ -51,8 +57,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFManager = getSupportFragmentManager();
-        mFragmentStack.clear();
-        mFragmentEntityMap.clear();
+        mFragmentContainerManager = FragmentContainerManager.getInstance();
+        mFragmentStack = mFragmentContainerManager.getFragmentStack();
+        mFragmentEntityMap = mFragmentContainerManager.getFragmentEntityMap();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     /**
@@ -245,14 +257,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     public final <T extends NodeFragment> void replaceFragment(T thisFragment, T thatFragment,
                                                                 boolean stickyStack, int requestCode, Bundle bundle) {
 
-        if (mFragmentStack.size() > 0){
-            mFManager.popBackStack();
-            NodeFragment outFragment = mFragmentStack.get(mFragmentStack.size() - 1);
-            mFragmentStack.remove(outFragment);
-            mFragmentEntityMap.remove(outFragment);
+        FragmentTransaction fragmentTransaction = mFManager.beginTransaction();
+        if (thisFragment != null) {
+            fragmentTransaction.remove(thisFragment).commit();
+            fragmentTransaction.commitNow();
+            fragmentTransaction = mFManager.beginTransaction();
+
+            mFragmentEntityMap.remove(thisFragment);
+            mFragmentStack.remove(thisFragment);
         }
 
-        FragmentTransaction fragmentTransaction = mFManager.beginTransaction();
         String fragmentTag = thatFragment.getClass().getSimpleName() + mAtomicInteger.incrementAndGet();
         if(bundle != null){
             thatFragment.setArguments(bundle);
@@ -284,6 +298,9 @@ public abstract class BaseActivity extends AppCompatActivity {
             fragmentTransaction.commit();
 
             NodeFragment outFragment = mFragmentStack.get(mFragmentStack.size() - 1);
+            //增加返回键调用
+//            outFragment.onBackPressed();
+
             inFragment.onResume();
 
             FragmentStackEntity stackEntity = mFragmentEntityMap.get(outFragment);
@@ -300,10 +317,65 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        //onBackPressed先于fragment的操作，如果fragment消费了onBackPressed，则不做后续退出操作
+        if(getCurrentFragment() != null){
+            if(getCurrentFragment().onBackPressed()){
+                return;
+            }
+        }
+        finishFragment();
+    }
+
+    public void finishFragment(){
         if (!onBackStackFragment()) {
-            finish();
+            exitApp();
         }
     }
+
+    private NodeFragment getCurrentFragment(){
+        NodeFragment currentFragment = null;
+        if (mFragmentStack.size() > 0) {
+            currentFragment = mFragmentStack.get(mFragmentStack.size() - 1);
+        }
+        return currentFragment;
+    }
+    /**
+     * 双击退出
+     */
+    private static Boolean isExit = false;
+    private void exitApp() {
+        Timer tExit = null;
+        if (!isExit) {
+            isExit = true; // 准备退出
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            // 如果2秒钟内没有按下返回键，则启动定时器取消掉刚才执行的任务
+            tExit = new Timer();
+            tExit.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    isExit = false; // 取消退出
+                }
+            }, 1500);
+
+
+        } else {
+            finish();
+            System.exit(0);
+        }
+    }
+
+    public List<Fragment> getFragments(){
+        return mFManager.getFragments();
+    }
+
+    /**
+     * Should be returned to display fragments id of {@link android.view.ViewGroup}.
+     *
+     * @return resource id of {@link android.view.ViewGroup}.
+     */
+    protected abstract
+    @IdRes
+    int fragmentLayoutId();
 
     /**
      * 获取fragment栈顶的fragment
@@ -324,12 +396,4 @@ public abstract class BaseActivity extends AppCompatActivity {
         return mFragmentStack;
     }
 
-    /**
-     * Should be returned to display fragments id of {@link android.view.ViewGroup}.
-     *
-     * @return resource id of {@link android.view.ViewGroup}.
-     */
-    protected abstract
-    @IdRes
-    int fragmentLayoutId();
 }

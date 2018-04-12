@@ -29,10 +29,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.view.SupportMenuInflater;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
 
 /**
  * Created by SUZY on 2018/3/20.
@@ -42,7 +44,16 @@ public class NodeFragment extends Fragment {
     public static final int RESULT_OK = Activity.RESULT_OK;
     public static final int RESULT_CANCELED = Activity.RESULT_CANCELED;
     public static final int REQUEST_CODE_POI_SEARCH= 100;
+    public static final int REQUEST_CODE_COLLECT_SUGGESTION_SEARCH= 200;
+    public static final int REQUEST_CODE_COLLECT_SUGGESTION= 201;
     private static final int REQUEST_CODE_INVALID = BaseActivity.REQUEST_CODE_INVALID;
+
+    private static final String TAG = "LIFE_CYCLE ";
+
+    public enum ResultType {
+        NONE, OK, CANCEL
+    }
+
 
     /**
      * Create a new instance of a Fragment with the given class name.  This is the same as calling its empty constructor.
@@ -146,13 +157,15 @@ public class NodeFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mActivity = (BaseActivity) context;
+        Log.d(TAG + getClass().getSimpleName(), " onAttach");
     }
 
     /**
      * Destroy me.
      */
     public void finish() {
-        mActivity.onBackPressed();
+//        mActivity.onBackPressed();
+        mActivity.finishFragment();
     }
 
     /**
@@ -514,6 +527,7 @@ public class NodeFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG + getClass().getSimpleName(),  " onCreateView");
         if(mLayoutResID > 0){
             return inflater.inflate(mLayoutResID, null);
         }else if(mView != null){
@@ -528,4 +542,75 @@ public class NodeFragment extends Fragment {
         }
         return null;
     }
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG + getClass().getSimpleName(),  " onCreate");
+    }
+
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG + getClass().getSimpleName(), " onActivityCreated");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG + getClass().getSimpleName(), " onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG + getClass().getSimpleName(), " onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG + getClass().getSimpleName(), " onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG + getClass().getSimpleName(), " onStop");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG + getClass().getSimpleName(), " onDestroyView");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG + getClass().getSimpleName(), " onDestroy");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG + getClass().getSimpleName(), " onDetach");
+    }
+
+    /**
+     * 默认返回false不拦截，返回true则拦截back操作，fragment将不进行后续的退出操作
+     * @return
+     */
+    public boolean onBackPressed() {
+        return false;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "MainActivity NodeFragment onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+    }
+
 }
