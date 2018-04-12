@@ -20,7 +20,7 @@ public class FragmentContainerManager {
 
     private List<NodeFragment> mFragmentStack = new ArrayList<>();
 
-    private Map<NodeFragment, BaseActivity.FragmentStackEntity> mFragmentEntityMap = new TreeMap<>();
+    private Map<NodeFragment, BaseActivity.FragmentStackEntity> mFragmentEntityMap = new HashMap<>();
 
     protected static FragmentContainerManager getInstance() {
         synchronized (FragmentContainerManager.class) {
