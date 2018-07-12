@@ -34,7 +34,8 @@ android {
 //            fileName = "${channel}_项目名称_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
 //            fileName = "项目名称11_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
             //将名字打印出来，以便及时查看是否满意。
-            println "文件名：-----------------${fileName}"
+            println "文件名：-----------------${IS_JENKINS}"
+            println "APP_VERSION 版本：-----------------${APP_VERSION}"
             //重新对apk命名。(适用于Gradle4.0以下版本)
 //            it.outputFile = new File(outputFile.parent, fileName)
             //重新对apk命名。(适用于Gradle4.0（含）以上版本)如果你Gradle版本是4.x则将上面的一行代码注释，解开注释下面的这一行。
