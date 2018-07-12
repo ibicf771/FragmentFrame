@@ -50,8 +50,22 @@ public class NodeFragment extends Fragment {
 
     private static final String TAG = "LIFE_CYCLE ";
 
+    private FragmentStackEntity mFragmentStackEntity;
+
     public enum ResultType {
         NONE, OK, CANCEL
+    }
+
+    public void setFragmentStackEntity(FragmentStackEntity fragmentStackEntity){
+        mFragmentStackEntity = fragmentStackEntity;
+    }
+
+    public FragmentStackEntity getFragmentStackEntity(){
+        return mFragmentStackEntity;
+    }
+
+    public void removeFragmentStackEntity(){
+        mFragmentStackEntity = null;
     }
 
 
@@ -276,7 +290,6 @@ public class NodeFragment extends Fragment {
     /**
      * Stack info.
      */
-    private BaseActivity.FragmentStackEntity mStackEntity;
 
     /**
      * Set result.
@@ -284,7 +297,9 @@ public class NodeFragment extends Fragment {
      * @param resultCode result code, one of {@link NodeFragment#RESULT_OK}, {@link NodeFragment#RESULT_CANCELED}.
      */
     protected final void setResult(@ResultCode int resultCode) {
-        mStackEntity.resultCode = resultCode;
+        if(mFragmentStackEntity != null){
+            mFragmentStackEntity.resultCode = resultCode;
+        }
     }
 
     /**
@@ -294,16 +309,12 @@ public class NodeFragment extends Fragment {
      * @param result     {@link Bundle}.
      */
     protected final void setResult(@ResultCode int resultCode, @NonNull Bundle result) {
-        mStackEntity.resultCode = resultCode;
-        mStackEntity.result = result;
+        if(mFragmentStackEntity != null){
+            mFragmentStackEntity.resultCode = resultCode;
+            mFragmentStackEntity.result = result;
+        }
     }
 
-    /**
-     * Get the resultCode for requestCode.
-     */
-    final void setStackEntity(@NonNull BaseActivity.FragmentStackEntity stackEntity) {
-        this.mStackEntity = stackEntity;
-    }
 
     /**
      * You should override it.
@@ -548,7 +559,12 @@ public class NodeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG + getClass().getSimpleName(),  " onCreate");
+        if(savedInstanceState != null){
+            mFragmentStackEntity = savedInstanceState.getParcelable(FRAGMENT_STACK_KEY);
+        }
     }
+
+
 
 
     @Override
@@ -607,10 +623,13 @@ public class NodeFragment extends Fragment {
         return false;
     }
 
+    private static String FRAGMENT_STACK_KEY = "fragment_stack_key";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "MainActivity NodeFragment onSaveInstanceState");
         super.onSaveInstanceState(outState);
+        outState.putParcelable(FRAGMENT_STACK_KEY, mFragmentStackEntity);
     }
 
 }

@@ -29,18 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     private FragmentManager mFManager;
     private AtomicInteger mAtomicInteger = new AtomicInteger();
     private List<NodeFragment> mFragmentStack = new ArrayList<>();
-    private Map<NodeFragment, FragmentStackEntity> mFragmentEntityMap = new HashMap<>();
 
-    public static class FragmentStackEntity {
-        private FragmentStackEntity() {
-        }
-
-        public boolean isSticky = false;
-        private int requestCode = REQUEST_CODE_INVALID;
-        @ResultCode
-        int resultCode = RESULT_CANCELED;
-        Bundle result = null;
-    }
 
     public final <T extends NodeFragment> T fragment(Class<T> fragmentClass) {
         //noinspection unchecked
@@ -56,6 +45,17 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFManager = getSupportFragmentManager();
+        if(savedInstanceState != null){
+            reSetFrameStack();
+        }
+    }
+
+    protected void reSetFrameStack(){
+        mFragmentStack.clear();
+        List<Fragment> fragments = mFManager.getFragments();
+        for(Fragment fragment : fragments){
+            mFragmentStack.add((NodeFragment) fragment);
+        }
     }
 
     @Override
@@ -190,7 +190,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         FragmentTransaction fragmentTransaction = mFManager.beginTransaction();
         if (thisFragment != null) {
-            FragmentStackEntity thisStackEntity = mFragmentEntityMap.get(thisFragment);
+            FragmentStackEntity thisStackEntity = thisFragment.getFragmentStackEntity();
             if (thisStackEntity != null) {
                 if (thisStackEntity.isSticky) {
                     thisFragment.onPause();
@@ -201,7 +201,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     fragmentTransaction.commitNow();
                     fragmentTransaction = mFManager.beginTransaction();
 
-                    mFragmentEntityMap.remove(thisFragment);
+                    thisFragment.removeFragmentStackEntity();
                     mFragmentStack.remove(thisFragment);
                 }
             }
@@ -218,8 +218,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         FragmentStackEntity fragmentStackEntity = new FragmentStackEntity();
         fragmentStackEntity.isSticky = stickyStack;
         fragmentStackEntity.requestCode = requestCode;
-        thatFragment.setStackEntity(fragmentStackEntity);
-        mFragmentEntityMap.put(thatFragment, fragmentStackEntity);
+//        thatFragment.setStackEntity(fragmentStackEntity);
+        thatFragment.setFragmentStackEntity(fragmentStackEntity);
+//        mFragmentEntityMap.put(thatFragment, fragmentStackEntity);
+        thatFragment.setFragmentStackEntity(fragmentStackEntity);
 
         mFragmentStack.add(thatFragment);
     }
@@ -259,7 +261,8 @@ public abstract class BaseActivity extends AppCompatActivity {
             fragmentTransaction.commitNow();
             fragmentTransaction = mFManager.beginTransaction();
 
-            mFragmentEntityMap.remove(thisFragment);
+//            mFragmentEntityMap.remove(thisFragment);
+            thisFragment.removeFragmentStackEntity();
             mFragmentStack.remove(thisFragment);
         }
 
@@ -274,8 +277,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         FragmentStackEntity fragmentStackEntity = new FragmentStackEntity();
         fragmentStackEntity.isSticky = stickyStack;
         fragmentStackEntity.requestCode = requestCode;
-        thatFragment.setStackEntity(fragmentStackEntity);
-        mFragmentEntityMap.put(thatFragment, fragmentStackEntity);
+//        thatFragment.setStackEntity(fragmentStackEntity);
+        thatFragment.setFragmentStackEntity(fragmentStackEntity);
+//        mFragmentEntityMap.put(thatFragment, fragmentStackEntity);
         mFragmentStack.add(thatFragment);
     }
 
@@ -299,9 +303,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             inFragment.onResume();
 
-            FragmentStackEntity stackEntity = mFragmentEntityMap.get(outFragment);
+//            FragmentStackEntity stackEntity = mFragmentEntityMap.get(outFragment);
+            FragmentStackEntity stackEntity = outFragment.getFragmentStackEntity();
             mFragmentStack.remove(outFragment);
-            mFragmentEntityMap.remove(outFragment);
+//            mFragmentEntityMap.remove(outFragment);
+            outFragment.removeFragmentStackEntity();
 
             if (stackEntity.requestCode != REQUEST_CODE_INVALID) {
                 inFragment.onFragmentResult(stackEntity.requestCode, stackEntity.resultCode, stackEntity.result);

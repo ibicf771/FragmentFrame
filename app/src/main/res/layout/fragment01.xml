@@ -10,10 +10,26 @@
         android:text="我是第一页"
         android:gravity="center"
         android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/show_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="上一页返回的信息"
+        android:gravity="center"
+        android:layout_gravity="center"/>
+
     <Button
-        android:text="第一页按钮"
+        android:text="跳转按钮"
         android:id="@+id/fragment_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/back"
+        android:text="返回"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 
 </LinearLayout>
