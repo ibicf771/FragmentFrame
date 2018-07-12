@@ -26,7 +26,7 @@ android {
 
             if ("true".equals(IS_JENKINS)) {
                 fileName = "项目名称_jenkins_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
-                it.outputFileName = fileName
+//                it.outputFileName = fileName
             }else{
                 fileName = "项目名称_local_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
             }
