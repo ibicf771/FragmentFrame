@@ -10,12 +10,46 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+
+    applicationVariants.all {
+        //判断是release还是debug版本
+        def buildType = it.buildType.name
+        def fileName
+        def outputFile
+        //下面的channel是获取渠道号，你获取渠道号不一定会和我的代码一样，因为有可能你的渠道名称的规则和我的不一样，我的规则是${渠道名}-${applicationId},所以我是这样取的。
+//        def channel = it.productFlavors[0].name.split("-")[0]
+        //获取当前时间的"YYYY-MM-dd"格式。
+        def createTime = new Date().format("MM-dd", TimeZone.getTimeZone("GMT+08:00"))
+        it.outputs.each {
+            outputFile = it.outputFile
+
+            if ("true".equals(IS_JENKINS)) {
+                fileName = "项目名称_jenkins_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
+                it.outputFileName = fileName
+            }else{
+                fileName = "项目名称_local_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
+            }
+            //我此处的命名规则是：渠道名_项目名_版本名_创建时间_构建类型.apk
+//            fileName = "PPG${defaultConfig.versionName}.apk"
+//            fileName = "${channel}_项目名称_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
+//            fileName = "项目名称11_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
+            //将名字打印出来，以便及时查看是否满意。
+            println "文件名：-----------------${fileName}"
+            //重新对apk命名。(适用于Gradle4.0以下版本)
+//            it.outputFile = new File(outputFile.parent, fileName)
+            //重新对apk命名。(适用于Gradle4.0（含）以上版本)如果你Gradle版本是4.x则将上面的一行代码注释，解开注释下面的这一行。
+            it.outputFileName = fileName
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
