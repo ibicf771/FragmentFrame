@@ -24,11 +24,10 @@ android {
         it.outputs.each {
             outputFile = it.outputFile
 
-            if ("true".equals(IS_JENKINS)) {
-                fileName = "项目名称_jenkins_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
-//                it.outputFileName = fileName
-            }else{
+            if ("false".equals(IS_JENKINS)) {
                 fileName = "项目名称_local_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
+            }else{
+                fileName = "项目名称_jenkins_v${defaultConfig.versionName}_${createTime}-${buildType}.apk"
             }
             //我此处的命名规则是：渠道名_项目名_版本名_创建时间_构建类型.apk
 //            fileName = "PPG${defaultConfig.versionName}.apk"
